@@ -1,5 +1,7 @@
+const validator = require("validator")
 let User = function(data) {
     this.data = data
+    this.errors = []
 }
 
 User.prototype.validate = function() {
