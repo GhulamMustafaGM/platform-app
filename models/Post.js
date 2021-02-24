@@ -1,5 +1,6 @@
 const postsCollection = require('../db').db().collection("posts")
 const ObjectID = require('mongodb').ObjectID
+const User = require('./User')
 
 let Post = function(data, userid) {
     this.data = data
