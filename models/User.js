@@ -5,6 +5,8 @@ const md5 = require('md5')
 let User = function(data) {
     this.data = data
     this.errors = []
+    if (getAvatar == undefined) { getAvatar = false }
+    if (getAvatar) { this.getAvatar() }
 }
 
 User.prototype.cleanUp = function() {
