@@ -1,39 +1,138 @@
-const express = require('express')
-const session = require('express-session')
-const MongoStore = require('connect-mongo')(session)
-const flash = require('connect-flash')
-const app = express()
+const postsCollection = require('../db').db().collection("posts")
+const ObjectID = require('mongodb').ObjectID
+const User = require('./User')
 
-let sessionOptions = session({
-    secret: "JavaScript is sooooooooo coool",
-    store: new MongoStore({ client: require('./db') }),
-    resave: false,
-    saveUninitialized: false,
-    cookie: { maxAge: 1000 * 60 * 60 * 24, httpOnly: true }
-})
+let Post = function(data, userid, requestedPostId) {
+    this.data = data
+    this.errors = []
+    this.userid = userid
+    this.requestedPostId = requestedPostId
+}
 
-app.use(sessionOptions)
-app.use(flash())
+Post.prototype.cleanUp = function() {
+    if (typeof(this.data.title) != "string") { this.data.title = "" }
+    if (typeof(this.data.body) != "string") { this.data.body = "" }
 
-app.use(function(req, res, next) {
-    // make current user id available on the req object
-    if (req.session.user) { req.visitorId = req.session.user._id } else { req.visitorId = 0 }
+    // get rid of any bogus properties
+    this.data = {
+        title: this.data.title.trim(),
+        body: this.data.body.trim(),
+        createdDate: new Date(),
+        author: ObjectID(this.userid)
+    }
+}
 
-    // make user session data available from within view templates
-    res.locals.user = req.session.user
-    next()
-})
+Post.prototype.validate = function() {
+    if (this.data.title == "") { this.errors.push("You must provide a title.") }
+    if (this.data.body == "") { this.errors.push("You must provide post content.") }
+}
 
-const router = require('./router')
+Post.prototype.create = function() {
+    return new Promise((resolve, reject) => {
+        this.cleanUp()
+        this.validate()
+        if (!this.errors.length) {
+            // save post into database
+            postsCollection.insertOne(this.data).then(() => {
+                resolve()
+            }).catch(() => {
+                this.errors.push("Please try again later.")
+                reject(this.errors)
+            })
+        } else {
+            reject(this.errors)
+        }
+    })
+}
 
-app.use(express.urlencoded({ extended: false }))
-app.use(express.json())
+Post.prototype.update = function() {
+    return new Promise(async(resolve, reject) => {
+        try {
+            let post = await Post.findSingleById(this.requestedPostId, this.userid)
+            if (post.isVisitorOwner) {
+                // actually update the db
+                let status = await this.actuallyUpdate()
+                resolve(status)
+            } else {
+                reject()
+            }
+        } catch {
+            reject()
+        }
+    })
+}
 
+Post.prototype.actuallyUpdate = function() {
+    return new Promise(async(resolve, reject) => {
+        this.cleanUp()
+        this.validate()
+        if (!this.errors.length) {
+            await postsCollection.findOneAndUpdate({ _id: new ObjectID(this.requestedPostId) }, { $set: { title: this.data.title, body: this.data.body } })
+            resolve("success")
+        } else {
+            resolve("failure")
+        }
+    })
+}
 
-app.use(express.static('public'))
-app.set('views', 'views')
-app.set('view engine', 'ejs')
+Post.reusablePostQuery = function(uniqueOperations, visitorId) {
+    return new Promise(async function(resolve, reject) {
+        let aggOperations = uniqueOperations.concat([
+            { $lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" } },
+            {
+                $project: {
+                    title: 1,
+                    body: 1,
+                    createdDate: 1,
+                    authorId: "$author",
+                    author: { $arrayElemAt: ["$authorDocument", 0] }
+                }
+            }
+        ])
 
-app.use('/', router)
+        let posts = await postsCollection.aggregate(aggOperations).toArray()
 
-module.expoerts = app
+        // clean up author property in each post object
+        posts = posts.map(function(post) {
+            post.isVisitorOwner = post.authorId.equals(visitorId)
+
+            post.author = {
+                username: post.author.username,
+                avatar: new User(post.author, true).avatar
+            }
+
+            return post
+        })
+
+        resolve(posts)
+    })
+}
+
+Post.findSingleById = function(id, visitorId) {
+    return new Promise(async function(resolve, reject) {
+        if (typeof(id) != "string" || !ObjectID.isValid(id)) {
+            reject()
+            return
+        }
+
+        let posts = await Post.reusablePostQuery([
+            { $match: { _id: new ObjectID(id) } }
+        ], visitorId)
+
+        if (posts.length) {
+            console.log(posts[0])
+            resolve(posts[0])
+        } else {
+            reject()
+        }
+    })
+}
+
+Post.findByAuthorId = function(authorId) {
+    return Post.reusablePostQuery([
+        { $match: { author: authorId } },
+        { $sort: { createdDate: -1 } }
+    ])
+}
+
+module.exports = Post
