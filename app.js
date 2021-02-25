@@ -4,6 +4,7 @@ const MongoStore = require('connect-mongo')(session)
 const flash = require('connect-flash')
 const markdown = require('marked')
 const app = express()
+const sanitizeHTML = require('sanitize-html')
 
 let sessionOptions = session({
     secret: "JavaScript is sooooooooo coool",
