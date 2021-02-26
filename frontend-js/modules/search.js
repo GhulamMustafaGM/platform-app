@@ -24,14 +24,38 @@ export default class Search {
     }
 
     // 3. Methods
+    keyPressHandler() {
+        let value = this.inputField.value
+
+        if (value != "" && value != this.previousValue) {
+            clearTimeout(this.typingWaitTimer)
+            this.showLoaderIcon()
+            this.typingWaitTimer = setTimeout(() => this.sendRequest(), 3000)
+        }
+
+        this.previousValue = value
+    }
+
+    sendRequest() {
+        axios.post('/search', { searchTerm: this.inputField.value }).then(() => {
+
+        }).catch(() => {
+            alert("Hello, the request failed.")
+        })
+    }
+
+    showLoaderIcon() {
+        this.loaderIcon.classList.add("circle-loader--visible")
+    }
+
     openOverlay() {
         this.overlay.classList.add("search-overlay--visible")
+        setTimeout(() => this.inputField.focus(), 50)
     }
 
     closeOverlay() {
         this.overlay.classList.remove("search-overlay--visible")
     }
-
 
     injectHTML() {
         document.body.insertAdjacentHTML('beforeend', `<div class="search-overlay">
