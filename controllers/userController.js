@@ -88,7 +88,8 @@ exports.profilePostsScreen = function(req, res) {
             posts: posts,
             profileUsername: req.profileUser.username,
             profileAvatar: req.profileUser.avatar,
-            isFollowing: req.isFollowing
+            isFollowing: req.isFollowing,
+            isVisitorsProfile: req.isVisitorsProfile
         })
     }).catch(function() {
         res.render("404")
