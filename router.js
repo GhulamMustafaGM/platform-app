@@ -23,6 +23,7 @@ router.post('/post/:id/delete', userController.mustBeLoggedIn, postController.de
 router.post('/search', postController.search)
 
 // follow related routes
-rrouter.post('/addFollow/:username', userController.mustBeLoggedIn, followController.addFollow)
+router.post('/addFollow/:username', userController.mustBeLoggedIn, followController.addFollow)
+router.post('/removeFollow/:username', userController.mustBeLoggedIn, followController.removeFollow)
 
 module.exports = router
