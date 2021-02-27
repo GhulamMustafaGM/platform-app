@@ -57,64 +57,64 @@ export default class Search {
     renderResultsHTML(posts) {
             if (posts.length) {
                 this.resultsArea.innerHTML = `<div class="list-group shadow-sm">
-      <div class="list-group-item active"><strong>Search Results</strong> (${posts.length > 1 ? `${posts.length} items found` : '1 item found'})</div>
-      ${posts.map(post => {
-        let postDate = new Date(post.createdDate)
-        return `<a href="/post/${post._id}" class="list-group-item list-group-item-action">
+    <div class="list-group-item active"><strong>Search Results</strong> (${posts.length > 1 ? `${posts.length} items found` : '1 item found'})</div>
+    ${posts.map(post => {
+                let postDate = new Date(post.createdDate)
+                return `<a href="/post/${post._id}" class="list-group-item list-group-item-action">
         <img class="avatar-tiny" src="${post.author.avatar}"> <strong>${post.title}</strong>
         <span class="text-muted small">by ${post.author.username} on ${postDate.getMonth()}/${postDate.getDate()}/${postDate.getFullYear()}</span>
-      </a>`
-      }).join('')}
+    </a>`
+            }).join('')}
     </div>`
-    } else {
-      this.resultsArea.innerHTML = `<p class="alert alert-danger text-center shadow-sm">Sorry, we could not find any results for that search.</p>`
+        } else {
+            this.resultsArea.innerHTML = `<p class="alert alert-danger text-center shadow-sm">Sorry, we could not find any results for that search.</p>`
+        }
+        this.hideLoaderIcon()
+        this.showResultsArea()
     }
-    this.hideLoaderIcon()
-    this.showResultsArea()
-  }
 
-  showLoaderIcon() {
-    this.loaderIcon.classList.add("circle-loader--visible")
-  }
+    showLoaderIcon() {
+        this.loaderIcon.classList.add("circle-loader--visible")
+    }
 
-  hideLoaderIcon() {
-    this.loaderIcon.classList.remove("circle-loader--visible")
-  }
+    hideLoaderIcon() {
+        this.loaderIcon.classList.remove("circle-loader--visible")
+    }
 
-  showResultsArea() {
-    this.resultsArea.classList.add("live-search-results--visible")
-  }
+    showResultsArea() {
+        this.resultsArea.classList.add("live-search-results--visible")
+    }
 
-  hideResultsArea() {
-    this.resultsArea.classList.remove("live-search-results--visible")
-  }
+    hideResultsArea() {
+        this.resultsArea.classList.remove("live-search-results--visible")
+    }
 
-  openOverlay() {
-    this.overlay.classList.add("search-overlay--visible")
-    setTimeout(() => this.inputField.focus(), 50)
-  }
+    openOverlay() {
+        this.overlay.classList.add("search-overlay--visible")
+        setTimeout(() => this.inputField.focus(), 50)
+    }
 
-  closeOverlay() {
-    this.overlay.classList.remove("search-overlay--visible")
-  }
+    closeOverlay() {
+        this.overlay.classList.remove("search-overlay--visible")
+    }
 
 
-  injectHTML() {
-    document.body.insertAdjacentHTML('beforeend', `<div class="search-overlay">
+    injectHTML() {
+        document.body.insertAdjacentHTML('beforeend', `<div class="search-overlay">
     <div class="search-overlay-top shadow-sm">
-      <div class="container container--narrow">
+    <div class="container container--narrow">
         <label for="live-search-field" class="search-overlay-icon"><i class="fas fa-search"></i></label>
         <input type="text" id="live-search-field" class="live-search-field" placeholder="What are you interested in?">
         <span class="close-live-search"><i class="fas fa-times-circle"></i></span>
-      </div>
+    </div>
     </div>
 
     <div class="search-overlay-bottom">
-      <div class="container container--narrow py-3">
+    <div class="container container--narrow py-3">
         <div class="circle-loader"></div>
         <div class="live-search-results"></div>
-      </div>
     </div>
-  </div>`)
-  }
+    </div>
+</div>`)
+    }
 }
