@@ -35,6 +35,19 @@ Follow.prototype.create = function() {
     })
 }
 
+Follow.prototype.delete = function() {
+    return new Promise(async(resolve, reject) => {
+        this.cleanUp()
+        await this.validate("delete")
+        if (!this.errors.length) {
+            await followsCollection.deleteOne({ followedId: this.followedId, authorId: new ObjectID(this.authorId) })
+            resolve()
+        } else {
+            reject(this.errors)
+        }
+    })
+}
+
 Follow.isVisitorFollowing = async function(followedId, visitorId) {
     let followDoc = await followsCollection.findOne({ followedId: followedId, authorId: new ObjectID(visitorId) })
     if (followDoc) {
