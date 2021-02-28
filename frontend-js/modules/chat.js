@@ -28,7 +28,10 @@ export default class Chat {
     }
 
     openConnection() {
-        alert("Opening a connection")
+        this.socket = io()
+        this.socket.on('chatMessageFromServer', function(data) {
+            alert(data.message)
+        })
     }
 
     injectHTML() {
