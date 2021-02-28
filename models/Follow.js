@@ -118,4 +118,11 @@ Follow.getFollowingById = function(id) {
     })
 }
 
+Follow.countFollowersById = function(id) {
+    return new Promise(async(resolve, reject) => {
+        let followerCount = await followsCollection.countDocuments({ followedId: id })
+        resolve(followerCount)
+    })
+}
+
 module.exports = Follow
