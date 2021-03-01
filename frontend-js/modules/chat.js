@@ -21,6 +21,12 @@ export default class Chat {
     }
 
     // Methods
+    sendMessageToServer() {
+        this.socket.emit('chatMessageFromBrowser', { message: this.chatField.value })
+        this.chatField.value = ''
+        this.chatField.focus()
+    }
+
     hideChat() {
         this.chatWrapper.classList.remove("chat--visible")
     }
