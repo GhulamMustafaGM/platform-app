@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify'
 export default class Chat {
     constructor() {
         this.openedYet = false
@@ -46,6 +47,7 @@ export default class Chat {
     showChat() {
         if (!this.openedYet) {
             this.openConnection()
+            this.chatField.focus()
         }
         this.openedYet = true
         this.chatWrapper.classList.add("chat--visible")
