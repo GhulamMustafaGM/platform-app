@@ -10,4 +10,6 @@ if (document.querySelector("#chat-wrapper")) {
     new Chat()
 }
 
-if (document.querySelector(".header-search-icon")) { new Search() }
+if (document.querySelector(".header-search-icon")) {
+    new Search()
+}
